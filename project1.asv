@@ -1,0 +1,11 @@
+ratings = load('jester_ratings.dat');
+
+ratings_total = sum(ratings(1:end, 3));
+
+disp();
+disp(size(ratings, 3));
+disp
+
+histogram(ratings(1:end, 3), 5, 'Normalization', 'probability');
+histogram(ratings(1:end, 3), 10, 'Normalization', 'probability');
+
