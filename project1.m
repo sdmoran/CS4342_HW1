@@ -26,9 +26,10 @@ disp("sigma = " + sigma);
 
 % Draw histogram
 
-%histogram(ratings(1:end, 3), 5, 'Normalization', 'probability');hold on
-%histogram(ratings(1:end, 3), 10, 'Normalization', 'probability');
-histogram(ratings(1:end, 3), 20, 'Normalization', 'probability');
+%histogram(ratings(1:end, 3), 5, 'Normalization', 'pdf');hold on
+%histogram(ratings(1:end, 3), 10, 'Normalization', 'pdf');
+%histogram(ratings(1:end, 3), 20, 'Normalization', 'pdf');
+histogram(ratings(1:end, 3), 30, 'Normalization', 'pdf');
 hold on
 
 % Set up and draw the normal PDF we've found from MLE
