@@ -7,6 +7,7 @@ n = length(ratings(1:end, 3));
 
 % Mu is simply the sum of all ratings divided by the number of ratings
 mu = ratings_total / n;
+
 sigma = 0;
 
 % Calculate sigma
@@ -23,22 +24,23 @@ disp(norm_data(1:10))
 sigma = sqrt(sigma);
 
 % Print statistics about the data
-disp("Total sum of ratings: " + ratings_total);
+disp("Total # ratings: " + ratings_total);
 disp("n = " + n);
 disp("mu = " + ratings_total / n);
 disp("sigma = " + sigma);
 
 % Draw histogram
-%bins = 50;
+bins = 10;
 %histogram(ratings(1:end, 3), bins, 'Normalization', 'pdf');
 histogram(ratings(1:end, 3), 'Normalization', 'pdf');
+title(bins + " bins");
 hold on
 
 % Set up and draw the normal PDF we've found from MLE
 pd = makedist('Normal','mu', mu,'sigma', sigma);
 x = -10:10;
 y = pdf(pd, x);
-plot(x, y, 'r', 'LineWidth', 2);
+plot(x, y, 'r');
 
 % Set up MLE of the logistic normal PDF
 
@@ -52,34 +54,38 @@ disp("0 idx: " + find(norm_data==0)) % log of 0 is undefined, so we can't use th
 % normalize to 1. So we calculate the MLE using indices [1, n-28].
 sorted = sort(norm_data);
 range = (2:n-28);
-
-% I get a reasonable value for mu, but a very small value for sigma. Maybe
-% my math is wrong somewhere, but I can't figure out where. Maybe just
-% losing accuracy because numbers are too small?
 mu_lognormal = sum(calc_logit(sorted(range))) / length(range);
-sigma_lognormal = sqrt((sum(calc_logit(sorted(range)) - mu_lognormal) .^ 2) / length(range));
+sigma_lognormal = (sum(calc_logit(sorted(range)) - mu_lognormal) .^ 2);
 disp("Mu_Lognormal: " +  mu_lognormal)
 disp("Sigma_Lognormal: " + sigma_lognormal)
 
-% Generate logistic normal function between 0 and 1 with the mu we
-% calcualted and a sigma that happens to make the data fit pretty well with
-% the histogram data :)
-l = Logistic_NormalPDF(0:0.001:1, mu_lognormal, 1.6);
-plot(x_vals, l / (max(l) * 10), 'LineWidth', 2);    % Scale down the distribution so it's a reasonable size
+
+disp("X vals needed: " + length(0:0.001:1));
+x_vals = -10:0.02:10;
+
+l = Logistic_NormalPDF(0:0.001:1, mu_lognormal, sigma_lognormal);
+plot(x_vals, l);
 
 
+%hf = histfit(norm_data, 60, 'beta');
+%disp(hf(1))
+%disp(get(hf(2),'XData')); 
+%disp(get(hf(2),'YData'));
 
-% Generate a Beta Distribution from the alpha and beta found by using
-% fitdist() on the data.
-alpha = 1.2404;
-beta = 0.9265;
-beta_xvals = -10:.01:10;
-scaled_beta=Scaled_BetaPDF(beta_xvals, alpha, beta, -10, 10);
+%scaledx = -10:10;
+%j = Scaled_BetaPDF(scaledx, 2, 2, -10, 10);
+%plot(j)
 
-plot(beta_xvals, scaled_beta, 'LineWidth', 2);
+% Plot PDF on top of histogram
+%plot(x, y, 'r')
+
+%xpts = linspace(0, 1, 1000);
+%l = Logistic_NormalPDF(linspace(0, 1, 1000), 1.0006, 0.4665);
+%plot(xpts, l);
+%m = mean(l, 'omitnan');
+%ex2 = mean(l.^2, 'omitnan');
 
 
-% Function declarations
 function logit = calc_logit(x)
 logit = log(x ./ (1 - x ));
 end

@@ -15,26 +15,15 @@ cv = cvpartition(size(data, 1), 'k', 10, 'Stratify', false);
 disp(cv)
 disp(size(cv.training(1)))
 
-alpha = 1.2404;
-beta = 0.9265;
-X = -10:.01:10;
-y2=Scaled_BetaPDF(X, alpha, beta, -10, 10);
+x = -10:0.01:10;
+y1 = betapdf(x, 1.2404, 0.9265);
+y2 = Scaled_BetaPDF(x, 1.2404, 0.92
 
 
+disp(pd);
 
-%x = 0:0.001:1;
-%y1 = betapdf(x, 1.2404, 0.9265);
-%y2 = Scaled_BetaPDF(x, 1.2404, 0.9265, -10, 10);
-
-disp("LEN: " + length(x))
-
-figure(1)
-plot(X, y1, 'r', 'LineWidth', 3)
-grid
-
-figure(2)
-plot(X, y2)
-grid
+scaled_beta = Scaled_BetaPDF(0:0.001:1, 1.2404, 0.9265, -10, 10);
+plot(scaled_beta);
 
 function PDF = Scaled_BetaPDF(y, a, b, p, q)
 PDF = ( (y-p).^(a-1) .* (q - y).^(b-1) ) ./ ( (q - p).^(a+b-1) .* beta(a,b) );
