@@ -14,3 +14,11 @@ cv = cvpartition(size(data, 1), 'k', 10, 'Stratify', false);
     end
 disp(cv)
 disp(size(cv.training(1)))
+
+x = [-10:10]
+j = Scaled_BetaPDF(x, 3, 4, -10, 10)
+plot(j)
+
+function PDF = Scaled_BetaPDF(y, a, b, p, q)
+PDF = ( (y-p).^(a-1) .* (q - y).^(b-1) ) ./ ( (q - p).^(a+b-1) .* beta(a,b) );
+end
