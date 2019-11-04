@@ -17,7 +17,7 @@ end
 % Normalize data
 data = ratings(1:end, 3);
 norm_data = (data - min(data)) / ((max(data)-min(data)));
-disp(norm_data(1:10))
+
 
 % Take sqrt of sigma at the end
 sigma = sqrt(sigma);
@@ -38,7 +38,7 @@ hold on
 pd = makedist('Normal','mu', mu,'sigma', sigma);
 x = -10:10;
 y = pdf(pd, x);
-plot(x, y, 'r', 'LineWidth', 2);
+%plot(x, y, 'r', 'LineWidth', 2);
 
 % Set up MLE of the logistic normal PDF
 
@@ -53,21 +53,26 @@ disp("0 idx: " + find(norm_data==0)) % log of 0 is undefined, so we can't use th
 sorted = sort(norm_data);
 range = (2:n-28);
 
-% I get a reasonable value for mu, but a very small value for sigma. Maybe
-% my math is wrong somewhere, but I can't figure out where. Maybe just
-% losing accuracy because numbers are too small?
-mu_lognormal = sum(calc_logit(sorted(range))) / length(range);
-sigma_lognormal = sqrt((sum(calc_logit(sorted(range)) - mu_lognormal) .^ 2) / length(range));
+% Normalized the data for this distribution, now we normalize the mean and
+% variance
+mu_lognormal = (mu - min(data)) / ((max(data)-min(data)));
+sigma_lognormal = (sigma - min(data)) / ((max(data)-min(data)));
+%mu_lognormal = sum(log(sorted(range))) / length(range);
+%sigma_lognormal = (sum(log(sorted(range).^2)) - sum(log(sorted(range)).^2)) / length(range);
+
 disp("Mu_Lognormal: " +  mu_lognormal)
 disp("Sigma_Lognormal: " + sigma_lognormal)
 
-% Generate logistic normal function between 0 and 1 with the mu we
-% calcualted and a sigma that happens to make the data fit pretty well with
-% the histogram data :)
-l = Logistic_NormalPDF(0:0.001:1, mu_lognormal, 1.6);
-plot(x_vals, l / (max(l) * 10), 'LineWidth', 2);    % Scale down the distribution so it's a reasonable size
+% Generate logistic normal function between 0 and 1 with the mu and sigma
+% calculated
+l = Logistic_NormalPDF(0:0.001:1, mu_lognormal,  sigma_lognormal);
+norm_l = (l - min(l)) / ((max(l)-min(l)));
 
 
+
+% Scale down the distribution so it's the same size as the others. 11.618
+% chosen because it is the mu divided by the interval.
+plot(x_vals, norm_l/11.618, 'LineWidth', 2);
 
 % Generate a Beta Distribution from the alpha and beta found by using
 % fitdist() on the data.
@@ -78,6 +83,9 @@ scaled_beta=Scaled_BetaPDF(beta_xvals, alpha, beta, -10, 10);
 
 plot(beta_xvals, scaled_beta, 'LineWidth', 2);
 
+
+m = mle(sorted(range), 'distribution', 'Lognormal');
+disp(m)
 
 % Function declarations
 function logit = calc_logit(x)

@@ -1,53 +1,88 @@
 ratings = load('jester_ratings.dat');
 data = ratings(1:end, 3);
 
+probs = zeros(1, 10);
+
+% Do 10 instances of partitioning data into 90% training 10% test data
 cv = cvpartition(size(data, 1), 'k', 10, 'Stratify', false);
-    for i = 1:cv.NumTestSets
-        trIdx = cv.training(i);
-        teIdx = cv.test(i);
+    % Loop through and do the training and testing for Normal distribution
+    for i = 1:2 %cv.NumTestSets
         % THIS LINE is how you get it to actually break up into the test samples.
         % Indices of data where cvpartition has nonzero values.
-        testClasses = data(cv.test(i));
-        disp(size(testClasses))
+        train_data = data(cv.training(i));
+        test_data = data(cv.test(i));
+        
+        % Get the sum of all joke ratings and the total number of jokes
+        ratings_total = sum(train_data);
+        n = length(train_data);
+        
+        % Mu is simply the sum of all ratings divided by the number of ratings
+        mu = ratings_total / n;
+
+        % Calculate sigma
+        sigma = 0;
+        for j = 1 : length(train_data)
+            sigma = sigma + (1 / n) * (train_data(j) - mu)^2;
+        end
+        sigma = sqrt(sigma);
+        
+        % Build normal distribution based on the data we've seen so far
+        pd = makedist('Normal','mu', mu,'sigma', sigma);
+        disp(pd);
+        
+        % For each element in the test set, calculate the probability we
+        % would select it from the normal distribution we've built
+        probability = 1;
+        for k = 1: length(test_data)
+            probability = probability * log(Normal_LL(test_data(k), mu, sigma));
+            %disp("Cumulative prob: " + (probability));
+        end
+        probs(i) = probability / length(test_data);
     end
-    
-disp(cv)
-disp(size(data(cv.training(1))))
+ 
+disp("Probabilities: ");
+disp(probs);
 
-% Get training data from the partition
 
-train_data = data(cv.training(1));
-test_data = data(cv.test(1));
-
-% Get the sum of all joke ratings and the total number of jokes
-ratings_total = sum(train_data);
-n = length(train_data);
-
-% ========== NORMAL DISTRIBUTION ==========
-% Mu is simply the sum of all ratings divided by the number of ratings
-mu = ratings_total / n;
-sigma = 0;
-
-% Calculate sigma
-for i = 1 : length(ratings(1:end, 3))
-    sigma = sigma + (1 / n) * (ratings(i, 3) - mu)^2;
+% % ========== NORMAL DISTRIBUTION ==========
+% % Mu is simply the sum of all ratings divided by the number of ratings
+% mu = ratings_total / n;
+% sigma = 0;
+% 
+% % Calculate sigma
+% for i = 1 : length(ratings(1:end, 3))
+%     sigma = sigma + (1 / n) * (ratings(i, 3) - mu)^2;
+% end
+% sigma = sqrt(sigma);
+% 
+% disp("MU: " + mu)
+% disp("SIGMA: " + sigma)
+% 
+% hold on
+% 
+% % Plot histogram of test data
+% histogram(test_data, 100, 'Normalization', 'pdf');
+% 
+% % Sample from our trained normal dist and plot histogram of sample data
+% y = sigma.*randn(length(test_data),1) + mu;
+% histogram(y, 100, 'Normalization', 'pdf');
+% xlim([-10, 10]);
+% 
+% pd = makedist('Normal','mu', mu,'sigma', sigma);
+% x = -10:10;
+% y = pdf(pd, x);
+% %plot(x, y, 'r', 'LineWidth', 2);
+% 
+% p = 1;
+% for i = -10:0.1:9.9
+%     prob = Normal_Likelihood(sigma + 0.01, sigma, mu);
+%     p = p * log(prob);
+% end
+% 
+% disp("P: "+ p)
+% 
+% % =============== NORMAL LIKELIHOOD ===============
+function norm_likelihood = Normal_LL(x, mu, sigma)
+norm_likelihood = (1 / sqrt(2 .* pi .* sigma.^2) .* exp(-(x - mu).^2 / (2 .* sigma.^2)));
 end
-sigma = sqrt(sigma);
-
-disp("MU: " + mu)
-disp("SIGMA: " + sigma)
-
-hold on
-
-% Plot histogram of test data
-histogram(test_data, 100, 'Normalization', 'pdf');
-
-% Sample from our trained normal dist and plot histogram of sample data
-y = sigma.*randn(length(test_data),1) + mu;
-histogram(y, 100, 'Normalization', 'pdf');
-xlim([-10, 10]);
-
-pd = makedist('Normal','mu', mu,'sigma', sigma);
-x = -10:10;
-y = pdf(pd, x);
-%plot(x, y, 'r', 'LineWidth', 2);
+% 

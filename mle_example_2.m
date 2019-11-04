@@ -18,7 +18,7 @@ set(gca,'fontsize', 18)
 grid minor
 
 xpts = linspace(0, 1, 1000);
-l = Logistic_NormalPDF(linspace(0, 1, 1000), 1.0006, 0.4665);
+l = Logistic_NormalPDF(linspace(0, 1, 1000), 0.580931, 0.265151);
 plot(xpts, l);
 m = mean(l, 'omitnan');
 ex2 = mean(l.^2, 'omitnan');

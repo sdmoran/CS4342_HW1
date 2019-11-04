@@ -1,41 +1,19 @@
 % Load data
-%ratings = load('jester_ratings.dat');
+ratings = load('jester_ratings.dat');
+data = ratings(1:end, 3);
+norm_data = (data - min(data)) / ((max(data)-min(data)));
 
-data = rand(54, 10);
+sorted = sort(norm_data);
+range = (2:n-28);
 
-cv = cvpartition(size(data, 1), 'k', 10, 'Stratify', false);
-    for i = 1:cv.NumTestSets
-        trIdx = cv.training(i);
-        teIdx = cv.test(i);
-        % THIS LINE is how you get it to actually break up into the test samples.
-        % Indices of data where cvpartition has nonzero values.
-        testClasses = data(cv.test(i));
-        disp(size(testClasses))
-    end
-disp(cv)
-disp(size(cv.training(1)))
+d = fitdist((sorted(range)), 'Normal');
+disp(d);
 
-alpha = 1.2404;
-beta = 0.9265;
-X = -10:.01:10;
-y2=Scaled_BetaPDF(X, alpha, beta, -10, 10);
+l = makedist('Lognormal', (1.618), (5.3026));
+x = 0:0.001:1;
+y = pdf(l, x);
+disp(l);
+plot(x, y);
 
 
-
-%x = 0:0.001:1;
-%y1 = betapdf(x, 1.2404, 0.9265);
-%y2 = Scaled_BetaPDF(x, 1.2404, 0.9265, -10, 10);
-
-disp("LEN: " + length(x))
-
-figure(1)
-plot(X, y1, 'r', 'LineWidth', 3)
-grid
-
-figure(2)
-plot(X, y2)
-grid
-
-function PDF = Scaled_BetaPDF(y, a, b, p, q)
-PDF = ( (y-p).^(a-1) .* (q - y).^(b-1) ) ./ ( (q - p).^(a+b-1) .* beta(a,b) );
-end
+%plot(d);
