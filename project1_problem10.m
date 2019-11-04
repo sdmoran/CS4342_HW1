@@ -6,7 +6,7 @@ probs = zeros(1, 10);
 % Do 10 instances of partitioning data into 90% training 10% test data
 cv = cvpartition(size(data, 1), 'k', 10, 'Stratify', false);
     % Loop through and do the training and testing for Normal distribution
-    for i = 1:2 %cv.NumTestSets
+    for i = 1:cv.NumTestSets
         % THIS LINE is how you get it to actually break up into the test samples.
         % Indices of data where cvpartition has nonzero values.
         train_data = data(cv.training(i));
@@ -32,9 +32,9 @@ cv = cvpartition(size(data, 1), 'k', 10, 'Stratify', false);
         
         % For each element in the test set, calculate the probability we
         % would select it from the normal distribution we've built
-        probability = 1;
+        probability = 0;
         for k = 1: length(test_data)
-            probability = probability * log(Normal_LL(test_data(k), mu, sigma));
+            probability = probability + log(pdf(pd, test_data(k)));
             %disp("Cumulative prob: " + (probability));
         end
         probs(i) = probability / length(test_data);
